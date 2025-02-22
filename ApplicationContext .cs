@@ -10,7 +10,6 @@ namespace its_bot
     public class SupportJiraContext: DbContext
     {
         public DbSet<AuthorizationJira> AuthorizationJiras { get; set; }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer($"{InfoManager.getServerInfo()}");

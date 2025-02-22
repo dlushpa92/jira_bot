@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Telegram.Bot;
 namespace its_bot
 {
@@ -17,11 +13,9 @@ namespace its_bot
                 using (var context = new SupportJiraContext())
                 {
                     var context1 = context;
-                    var authorizations = context.AuthorizationJiras.ToList(); // Получение всех записей
+                    var authorizations = context.AuthorizationJiras.ToList();
                     var codedUserId = EncodingToSha256.ComputeSha256Hash(Convert.ToString(userId));
                     var isExists = authorizations.Exists(user => user.ChatId == codedUserId);
-                    Console.WriteLine("isExists   " + isExists);
-                    //Console.WriteLine("hello   "+authorizations);
                     if (isExists == false)
                     {
                         await bot.SendMessage(userId, "У вас нет доступа для работы с ботом! \n" + "Для получения доступа введите token*<ваш токен jira>");
@@ -29,21 +23,10 @@ namespace its_bot
                     else
                     {
                         var user = authorizations[0];
-                        ;
-                        //var chatId = user.ChatId;
-                        //jiraToken = user.JiraToken;
                         Console.WriteLine(userId);
-                        ;
                         return user.JiraToken;
-                        //await bot.SendMessage(userId, $"Добро пожаловать, {user.FirstName}!");
-                        ;
                     }
                     return "";
-                    //foreach (var authorization in authorizations)
-                    //{
-                    //    Console.WriteLine(1);
-                    //    Console.WriteLine($"Id: {authorization.ChatId}, Username: {authorization.UserName}, JiraToken: {authorization.JiraToken}");
-                    //}
                 }
             }
             catch (Exception ex)
@@ -61,7 +44,7 @@ namespace its_bot
             var firstName = fullname.Split(' ')[0];
             var lastName = fullname.Split(' ')[1];
             var codedUserId = EncodingToSha256.ComputeSha256Hash(Convert.ToString(userId));
-            ;
+
             try
             {
                 using (var context = new SupportJiraContext())
@@ -73,11 +56,10 @@ namespace its_bot
                         LastName = lastName,
                         ChatId = codedUserId,
                         JiraToken = jiraToken,
-                        //Id = 1
                     };
 
-                    context.AuthorizationJiras.Add(authorizationJira); // Добавление новой записи
-                    context.SaveChanges(); // Сохранение изменений в базе данных
+                    context.AuthorizationJiras.Add(authorizationJira);
+                    context.SaveChanges();
                     Console.WriteLine("Запись успешно добавлена.");
                 }
             }
@@ -86,7 +68,6 @@ namespace its_bot
                 await bot.SendMessage(userId, "Не удалось создать запись!");
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.InnerException);
-               
             }
             finally
             {

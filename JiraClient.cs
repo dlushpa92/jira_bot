@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -14,7 +11,7 @@ using its_bot.Models.Json;
 using its_bot.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Azure;
+
 
 namespace its_bot
 {
@@ -24,7 +21,6 @@ namespace its_bot
         private readonly string _token;
         private readonly string _jiraBaseUrl;
 
-
         public JiraClient(string token)
         {
             var path = Path.Combine(Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.FullName, "config.json");
@@ -33,7 +29,6 @@ namespace its_bot
 
             _token = token;
             _jiraBaseUrl = appSettings.BaseUrl;
-
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + _token);
             _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
@@ -48,7 +43,7 @@ namespace its_bot
                 if (response.IsSuccessStatusCode)
                 {
                     string content = await response.Content.ReadAsStringAsync();
-                    //Console.WriteLine("Issue Details: " + content);
+
                     if (string.IsNullOrWhiteSpace(content))
                     {
                         Console.WriteLine("Response content is empty or null.");
@@ -57,15 +52,24 @@ namespace its_bot
                     else
                     {
                         var contentDeserialize = JsonConvert.DeserializeObject<GetIssue>(content);
-                        Console.WriteLine(contentDeserialize);
-                        Console.WriteLine(JsonConvert.SerializeObject(contentDeserialize, Formatting.Indented));
                         return contentDeserialize;
                     }
                 }
                 else
                 {
-                    
-                    await bot.SendMessage(chatId, $"Ошибка - {response.StatusCode}");
+                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        await bot.SendMessage(chatId, "У вас нет прав");
+                    }
+                    else if(response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        await bot.SendMessage(chatId, "Задача не существует");
+                    }
+                    else
+                    {
+                        await bot.SendMessage(chatId, $"Ошибка - {response.StatusCode}");
+                    }
+
                     Console.WriteLine($"Error fetching issue: {response.StatusCode}");
                 }
             }
@@ -97,7 +101,6 @@ namespace its_bot
                     else
                     {
                         Console.WriteLine($"Ошибка: {response.StatusCode}");
-                        //var errorText = "Ничего не найдено";
                     }
                 }
                 catch (Exception ex)
@@ -109,9 +112,6 @@ namespace its_bot
 
         public static async Task CreateIssue(string token, string url, string title, string description)
         {
-            //var title = userSession.TaskTitle;
-            //var description = userSession.TaskDescription;
-
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
@@ -136,19 +136,17 @@ namespace its_bot
                         }
                     };
                     var jsonIssue = JsonConvert.SerializeObject(issue);
-                    Console.WriteLine("jsonIssue " + jsonIssue);
                     var content = new StringContent(jsonIssue, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url + "/rest/api/2/issue", content);
 
                     if (response.IsSuccessStatusCode)
                     {
                         string responseIssue = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine(responseIssue);
                     }
                     else
                     {
-                        Console.WriteLine(JsonConvert.SerializeObject(response));
                         Console.WriteLine($"Ошибка1: {response.StatusCode}");
+                        ;
                         var errorText = "Ничего не найдено";
                     }
                 }
@@ -171,33 +169,25 @@ namespace its_bot
                     if (response.IsSuccessStatusCode)
                     {
                         string content = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine(content);
                         var contentDeserialize = JsonConvert.DeserializeObject<CurrentUser>(content);
-                        Console.WriteLine(contentDeserialize);
                         return contentDeserialize;
                     }
                     else
                     {
                         return null;
-                        //Console.WriteLine($"Ошибка: {response.StatusCode}");
-                        //var errorText = "Ничего не найдено";
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Обработка ошибок
                     Console.WriteLine($"Ошибка: {ex.Message}");
                     return null;
                 }
-
             }
-
         }
 
         public class Issue
         {
             public string Name { get; set; }
-
         }
     }
 }

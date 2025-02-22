@@ -9,13 +9,11 @@ namespace its_bot.Models.Json
     public class GetIssue
     {
         public string key { get; set; }
-        //public string description { get; set; }
         public string self {  get; set; }
         public Fields fields {get; set; }
     }
     public class Fields
     {
-        //public IssueType issuetype { get; set; }
         public string description { get; set; }
         public Assignee assignee { get; set; }
 
@@ -24,8 +22,4 @@ namespace its_bot.Models.Json
     {
         public string displayName {  get; set; } 
     }
-    //public class IssueType
-    //{
-    //    public string description { get; set; }
-    //}
 }   

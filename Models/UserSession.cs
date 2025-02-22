@@ -16,7 +16,7 @@ namespace its_bot.Models
     class UserSession
     {
         public string Step {  get; set; }
-        public string TaskTitle { get; set; }        // Название задачи
-        public string TaskDescription { get; set; }  // Описание задачи
+        public string TaskTitle { get; set; }
+        public string TaskDescription { get; set; }
     }
 }

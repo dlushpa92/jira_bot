@@ -11,7 +11,6 @@ namespace its_bot
     {
         public static string ComputeSha256Hash(string stringData)
         {
-            // Создаем объект SHA256
             using (SHA256 sha256Hash = SHA256.Create())
             {
                 byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(stringData));
