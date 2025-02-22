@@ -4,7 +4,7 @@ namespace its_bot
 {
     public class UserManager
     {
-        public static async Task<string> GetUserFromDB(ITelegramBotClient bot, Telegram.Bot.Types.Update update, string jiraToken)
+        public static async Task<string> GetUserFromDB(ITelegramBotClient bot, Telegram.Bot.Types.Update update, string jiraToken, string query)
         {
             var userId = update.Message.Chat.Id;
             try
@@ -23,7 +23,10 @@ namespace its_bot
                     else
                     {
                         var user = authorizations[0];
-                        Console.WriteLine(userId);
+                        if(query == "start")
+                        {
+                            bot.SendMessage(userId, "У вас уже есть доступ к боту!");
+                        }
                         return user.JiraToken;
                     }
                     return "";

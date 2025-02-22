@@ -22,6 +22,7 @@ namespace its_bot
         public async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
         {
             string message = "";
+
             if (update.Type == UpdateType.Message && update.Message?.Text != null)
             {
                 message = update.Message.Text;
@@ -50,10 +51,6 @@ namespace its_bot
                 }
                 else if (update.Type == UpdateType.Message && update.Message?.Text?.Contains("token*") == true)
                 {
-                    if (update.Message?.Text?.Contains("<") == true)
-                    {
-
-                    }
                     var text = update.Message.Text.Split('*');
                     var userId = update.Message.Chat.Id;
                     var gottenJiraToken = "";
@@ -163,21 +160,20 @@ namespace its_bot
             switch (command)
             {
                 case "/start":
-                    await UserManager.GetUserFromDB(bot, update, jiraToken);
+                    await UserManager.GetUserFromDB(bot, update, jiraToken, "start");
                     break;
 
                 case "/jira":
-                    jiraToken = await UserManager.GetUserFromDB(bot, update, jiraToken);
-
+                    jiraToken = await UserManager.GetUserFromDB(bot, update, jiraToken, "jira");
+                    
                     if (jiraToken != "")
                     {
                         var inlineMarkup = new InlineKeyboardMarkup()
                             .AddNewRow()
                                 .AddButton("Создать задачу", "%createissue")
                                 .AddButton("Найти задачу", "%getissue");
-                        await bot.SendMessage(userId, "Выберите действие:", replyMarkup: inlineMarkup);
+                        var message = await bot.SendMessage(userId, "Выберите действие:", replyMarkup: inlineMarkup);
                     }
-
                     break;
 
                 case "/info":
