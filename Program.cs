@@ -1,41 +1,59 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bot.Types;
-using System.Threading;
-using Atlassian.Jira;
 using its_bot;
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot.Polling;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using Microsoft.IdentityModel.Tokens;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using its_bot.Models;
-using static Telegram.Bot.TelegramBotClient;
-
+using Microsoft.Extensions.Configuration;
+using Serilog;
 
 internal class Program
 {
+    //private static string jiraToken = "";
+    //public static Dictionary<long, UserSession> userSessions = new Dictionary<long, UserSession>();
     static async Task Main(string[] args)
     {
-        var botToken = InfoManager.getToken();
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
+
+        string botToken = configuration["TelegramBot:BotToken"];
+        string connectionString = configuration.GetConnectionString("DefaultConnection");
+
+        if (string.IsNullOrEmpty(botToken))
+        {
+            Console.WriteLine("Не настроен токена бота. Проверьте конфигурацию проекта.");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            Console.WriteLine("Не настроено подключение к БД.Проверьте конфигурацию проекта.");
+            return;
+        }
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) // Логи в файл
+            .CreateLogger();
 
         using var cts = new CancellationTokenSource();
         var bot = new TelegramBotClient(botToken);
+
         var receiverOptions = new ReceiverOptions
         {
             AllowedUpdates = new[] { UpdateType.Message, UpdateType.CallbackQuery },
             DropPendingUpdates = true
         };
 
-        var handler = new UpdateHandler();
+        var handler = new UpdateHandler(configuration);
         handler.OnHandleUpdateStarted += (message) => Console.WriteLine($"Началась обработка сообщения '{message}'");
         handler.OnHandleUpdateCompleted += (message) => Console.WriteLine($"Закончилась обработка сообщения '{message}'");
 
         bot.StartReceiving(handler, receiverOptions, cts.Token);
         Console.WriteLine("bot запущен!");
+
         try
         {
             while (!cts.Token.IsCancellationRequested)
