@@ -47,7 +47,6 @@ namespace its_bot
                     Log.Information("Пользователь найден: FirstName={FirstName}, LastName={LastName}", user.FirstName, user.LastName);
 
                     Console.WriteLine($"Пользователь: {user.LastName} {user.FirstName}");
-
                     return user.JiraToken;
                 }
             }

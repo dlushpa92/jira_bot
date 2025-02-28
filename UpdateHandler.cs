@@ -7,7 +7,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types;
 using its_bot.Services;
 using Microsoft.Extensions.Configuration;
-
+//using its_bot.Services.Mes
 namespace its_bot
 {
     public class UpdateHandler : IUpdateHandler
@@ -17,6 +17,7 @@ namespace its_bot
         public event Action<string> OnHandleUpdateStarted;
         public event Action<string> OnHandleUpdateCompleted;
         public event Action<string> OnHandleUpdateCallback;
+        
 
         private readonly IConfiguration _configuration;
 
@@ -66,7 +67,7 @@ namespace its_bot
                         var url = await GetUrl();
                         Console.WriteLine(url);
                         var curentUser = await JiraClient.getCurrentUser(gottenJiraToken, url);
-
+                        
                         if (curentUser == null)
                         {
                             await bot.SendMessage(userId, "Введенный токен не валиден!");
@@ -74,6 +75,7 @@ namespace its_bot
                         else
                         {
                             await UserManager.CreateUserInDB(bot, update, gottenJiraToken, curentUser.displayName);
+
                         }
                     }
                     else
@@ -121,6 +123,8 @@ namespace its_bot
                     var session = userSessions[userId];
                     var currentStep = session.Step;
                     var text = update.Message.Text;
+                    var messageId = 0;
+                    MessageRemove MessageRemove = new Services.MessageRemove();
 
                     if (currentStep == "begin")
                     {
@@ -141,7 +145,9 @@ namespace its_bot
                         var createIssueText = "Создать задачу? \n " +
                             $"заголовок: {session.TaskTitle} \n" +
                             $"описание: {session.TaskDescription}";
-                        await bot.SendMessage(userId, createIssueText, replyMarkup: inlineMarkup);
+                        var buttonMessage = await bot.SendMessage(userId, createIssueText, replyMarkup: inlineMarkup);
+                        messageId = buttonMessage.MessageId;
+                        Services.MessageRemove.Add("createOrNot", messageId);
 
                     }
                     Console.WriteLine(update.Message.Text);
@@ -163,25 +169,36 @@ namespace its_bot
         {
             var msg = update.Message;
             var userId = update.Message.Chat.Id;
-            ;
+            var messageId = 0;
+            MessageRemove MessageRemove = new Services.MessageRemove();
+            jiraToken = await UserManager.GetUserFromDB(bot, update);
+
             switch (command)
             {
                 case "/start":
-                    await UserManager.GetUserFromDB(bot, update);
+                    //await UserManager.GetUserFromDB(bot, update);
+                    var user = await JiraClient.getCurrentUser(jiraToken, _configuration["Jira:BaseUrl"]);
+
+                    if(user != null)
+                    {
+                        var name = user.displayName.Split(" ");
+                        var greet = new Services.Greetings(name);
+                        var greetings = greet.greetingsUser();
+                        await bot.SendMessage(userId, greetings);
+                    }
                     break;
 
                 case "/jira":
-                    Console.WriteLine("token is: " + jiraToken);
-                    jiraToken = await UserManager.GetUserFromDB(bot, update);
 
                     if (jiraToken != "")
                     {
-                        Console.WriteLine("/jira");
                         var inlineMarkup = new InlineKeyboardMarkup()
                             .AddNewRow()
                                 .AddButton("Создать задачу", "%createissue")
                                 .AddButton("Найти задачу", "%getissue");
-                        await bot.SendMessage(userId, "Выберите действие:", replyMarkup: inlineMarkup);
+                        var buttonMessage = await bot.SendMessage(userId, "Выберите действие:", replyMarkup: inlineMarkup);
+                        messageId = buttonMessage.MessageId;
+                        Services.MessageRemove.Add("/jira", messageId);
                     }
 
                     break;
@@ -215,7 +232,7 @@ namespace its_bot
                 }
 
                 await bot.SendMessage(userId, "Введите заголовок задачи");
-
+                await bot.DeleteMessage(userId, MessageRemove.GetMessageId("/jira"));
             }
             else if (callbackQuery.Data == "createIssue")
             {
@@ -234,11 +251,13 @@ namespace its_bot
 
                 session.Step = "completed";
                 await bot.SendMessage(userId, "Задача создана!");
+                await bot.DeleteMessage(userId, Services.MessageRemove.GetMessageId("createOrNot"));
             }
             else if (callbackQuery.Data == "dontCreateIssue")
             {
                 long userId = callbackMsg.Chat.Id;
                 await bot.SendMessage(userId, "Создание задачи отменено!");
+                await bot.DeleteMessage(userId, Services.MessageRemove.GetMessageId("createOrNot"));
             }
 
         }

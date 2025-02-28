@@ -1,4 +1,5 @@
 ﻿using its_bot.Models.Json;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System.Text;

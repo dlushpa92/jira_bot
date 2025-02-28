@@ -8,8 +8,6 @@ using Serilog;
 
 internal class Program
 {
-    //private static string jiraToken = "";
-    //public static Dictionary<long, UserSession> userSessions = new Dictionary<long, UserSession>();
     static async Task Main(string[] args)
     {
         var configuration = new ConfigurationBuilder()
@@ -35,7 +33,7 @@ internal class Program
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) // Логи в файл
+            .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
         using var cts = new CancellationTokenSource();
