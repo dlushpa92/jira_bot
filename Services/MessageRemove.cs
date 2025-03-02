@@ -15,8 +15,6 @@ namespace its_bot.Services
 
         public MessageRemove()
         {
-            //_chatId = chatId;
-            //_messageId = messageId;
             _state = new Dictionary<string, int>();
         }
 
@@ -29,7 +27,6 @@ namespace its_bot.Services
         {
             int messageId = 0;
             _state.TryGetValue(nameOfMessage, out messageId);
-            Console.WriteLine(messageId);
             return messageId;
         }
         public static void Remove(string nameOfMessage) 
@@ -42,9 +39,7 @@ namespace its_bot.Services
                 }
                 else
                 {
-
                     _state.Remove(nameOfMessage);
-
                 }
             }
         }

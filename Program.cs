@@ -20,7 +20,7 @@ internal class Program
 
         if (string.IsNullOrEmpty(botToken))
         {
-            Console.WriteLine("Не настроен токена бота. Проверьте конфигурацию проекта.");
+            Console.WriteLine("Не настроен токен бота. Проверьте конфигурацию проекта.");
             return;
         }
 

@@ -7,7 +7,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types;
 using its_bot.Services;
 using Microsoft.Extensions.Configuration;
-//using its_bot.Services.Mes
+
 namespace its_bot
 {
     public class UpdateHandler : IUpdateHandler
@@ -82,8 +82,6 @@ namespace its_bot
                     {
                         await bot.SendMessage(userId, "Введенный токен не валидный!");
                     }
-
-                    Console.WriteLine(jiraToken);
                 }
 
                 else if (update.Type == UpdateType.Message && update.Message?.Text?.StartsWith("/") == true)
@@ -176,7 +174,6 @@ namespace its_bot
             switch (command)
             {
                 case "/start":
-                    //await UserManager.GetUserFromDB(bot, update);
                     var user = await JiraClient.getCurrentUser(jiraToken, _configuration["Jira:BaseUrl"]);
 
                     if(user != null)

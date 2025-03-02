@@ -48,7 +48,6 @@ namespace its_bot.Services
                 }
                 else
                 {
-
                     await bot.SendMessage(chatId, $"Ошибка - {response.StatusCode}");
                     Console.WriteLine($"Error fetching issue: {response.StatusCode}");
                 }

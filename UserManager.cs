@@ -25,7 +25,6 @@ namespace its_bot
             try
             {
                 await bot.SendMessage(userId, "Данные обрабатываются...");
-
                 var optionsBuilder = new DbContextOptionsBuilder<SupportJiraContext>();
                 optionsBuilder.UseSqlServer(connectionString);
 
@@ -40,7 +39,6 @@ namespace its_bot
 
                         await bot.SendMessage(userId, "У вас нет доступа для работы с ботом! \n" +
                                                       "Для получения доступа введите token*<ваш токен jira>");
-
                         return "";
                     }
 
@@ -53,13 +51,11 @@ namespace its_bot
             catch (DbUpdateException dbEx)
             {
                 Log.Error(dbEx, "Ошибка базы данных при чтении записи для пользователя с ChatId: {ChatId}", userId);
-
                 await bot.SendMessage(userId, "Произошла ошибка при работе с базой данных.");
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Непредвиденная ошибка при чтении записи для пользователя с ChatId: {ChatId}", userId);
-
                 await bot.SendMessage(userId, "Произошла непредвиденная ошибка.");
             }
 

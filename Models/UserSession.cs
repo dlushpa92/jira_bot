@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace its_bot.Models
 {
-    enum QuestionStep
-    {
-        AskTaskTitle,
-        AskTaskDescription,
-        Done
-    }
+    //enum QuestionStep
+    //{
+    //    AskTaskTitle,
+    //    AskTaskDescription,
+    //    Done
+    //}
 
     class UserSession
     {
